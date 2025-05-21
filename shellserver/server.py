@@ -1,5 +1,5 @@
 from mcp.server.fastmcp import FastMCP
-import subprocess
+import asyncio
 from typing import Dict, Any
 
 # Create an MCP server
@@ -7,7 +7,7 @@ mcp = FastMCP("Terminal Server")
 
 # Add a terminal command execution tool
 @mcp.tool()
-def execute_command(command: str) -> Dict[str, Any]:
+async def execute_command(command: str) -> Dict[str, Any]:
     """
     Execute a terminal command
     
@@ -18,20 +18,21 @@ def execute_command(command: str) -> Dict[str, Any]:
         A dictionary containing the command output and exit code
     """
     try:
-        # Execute the command and capture output
-        result = subprocess.run(
+        # Execute the command asynchronously and capture output
+        process = await asyncio.create_subprocess_shell(
             command,
-            shell=True,
-            check=False,
-            capture_output=True,
-            text=True
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
         )
         
+        # Await the process completion and get output
+        stdout, stderr = await process.communicate()
+        
         return {
-            "stdout": result.stdout,
-            "stderr": result.stderr,
-            "exit_code": result.returncode,
-            "success": result.returncode == 0
+            "stdout": stdout.decode(),
+            "stderr": stderr.decode(),
+            "exit_code": process.returncode,
+            "success": process.returncode == 0
         }
     except Exception as e:
         return {
@@ -43,9 +44,4 @@ def execute_command(command: str) -> Dict[str, Any]:
 
 # Add a simple entry point for running the server
 if __name__ == "__main__":
-    import asyncio
-    
-    async def main():
-        await mcp.run()
-    
-    asyncio.run(main())
+    mcp.run("stdio")
