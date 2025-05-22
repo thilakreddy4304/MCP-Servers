@@ -1,5 +1,7 @@
 # MCP Servers Collection
 
+![MCP Tool Call Demo](/static/mcp-tool-call.gif)
+
 This repository contains a collection of Model Context Protocol (MCP) servers for different purposes. Each subdirectory is a separate MCP server implementation that can be used with Claude Desktop, the MCP CLI, or any other MCP-compatible client.
 
 ## Available Servers
